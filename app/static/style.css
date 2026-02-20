@@ -1,0 +1,419 @@
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --success-color: #4cc9f0;
+    --danger-color: #f72585;
+    --light-bg: #f8f9fa;
+    --dark-bg: #212529;
+}
+
+body {
+    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+    font-family: "Inter", sans-serif;
+    background-color: #f5f7fb;
+    color: #333;
+    padding-bottom: 40px;
+}
+
+/* .header-container {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 0.5rem 0;
+    border-radius: 0 0 15px 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header-container h1{
+    font-size: 2rem !important;
+} */
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+.card-header {
+    font-family: "Poppins", "Inter", sans-serif; 
+    background-color: white;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+}
+
+.table-container {
+    overflow-x: auto;
+    
+}
+
+.cashflow-table {
+    width: 100%;
+    font-size: 0.90rem;
+    border-collapse: collapse;
+}
+
+.cashflow-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    text-align: center;
+    padding: 1rem 0.75rem;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.cashflow-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+}
+
+.category-row {
+    background-color: #eef2ff !important;
+    font-weight: 600;
+    color: var(--secondary-color);
+    cursor: pointer;
+}
+
+.type-row {
+    background-color: #f8f9ff !important;
+    font-weight: 600;
+    color: #555;
+}
+
+.account-row {
+    background-color: white;
+}
+
+.month-cell {
+    text-align: right;
+    min-width: 100px;
+    /* font-family: 'Courier New', monospace; */
+    font-weight: 500;
+}
+
+.total-cell {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.balance-cell {
+    font-weight: 600;
+    background-color: #f0f7ff;
+    text-align: right;
+    /* font-family: 'Courier New', monospace; */
+}
+
+.cash-in {
+    color: #28a745;
+}
+
+.cash-out {
+    color: #dc3545;
+}
+
+.expand-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    margin-right: 5px;
+    transition: transform 0.2s;
+}
+
+.expand-btn:hover {
+    transform: scale(1.1);
+}
+
+.collapsed .expand-btn i {
+    transform: rotate(-90deg);
+}
+
+.summary-card {
+    border-left: 5px solid var(--primary-color);
+}
+
+.balance-positive {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.balance-negative {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.month-header {
+    background-color: #f0f2f5;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.highlight-cell {
+    background-color: rgba(67, 97, 238, 0.05);
+}
+
+.balance-row {
+    background-color: #f8f9fa !important;
+    font-weight: 600;
+}
+
+.opening-balance-row {
+    background-color: #e8f4ff !important;
+    text-wrap-mode: nowrap;
+}
+
+.closing-balance-row {
+    background-color: #e8f7f0 !important;
+    text-wrap-mode: nowrap;
+}
+
+/* search icon button (clean, no background) */
+.search-icon-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.6rem;
+    color: #5f6b7a;
+    /* padding: 8px 12px; */
+    border-radius: 50px;
+    transition: 0.15s;
+    line-height: 1;
+    border: 1px solid transparent;
+}
+.search-icon-btn:hover {
+    background: #f1f4f9;
+    color: #1e293b;
+    border-color: #dde3ed;
+}
+ .search-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.02);
+    backdrop-filter: blur(1px);
+    z-index: 1040;
+    display: none; /* hidden until opened via js */
+}
+.search-modal {
+    position: fixed;
+    top: 0;
+    right: -460px;      /* hidden off canvas */
+    width: 420px;
+    max-width: calc(100% - 30px);
+    height: 100vh;
+    background: white;
+    box-shadow: -10px 0 35px -8px rgba(0,20,40,0.1);
+    z-index: 1050;
+    transition: right 0.25s ease-out;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #eef2f6;
+}
+.search-modal.show {
+    right: 0;  /* slides in */
+}
+.modal-header {
+    padding: 1.5rem 1.8rem 0.8rem 1.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ecf1f7;
+    background: white;
+}
+.modal-header h3 {
+    font-weight: 500;
+    font-size: 1.4rem;
+    color: #1f2a41;
+    margin: 0;
+}
+.modal-header .btn-close {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    line-height: 1;
+    color: #7c879a;
+    padding: 0;
+    opacity: 0.7;
+}
+.modal-header .btn-close:hover {
+    opacity: 1;
+    color: #1e293b;
+}
+.modal-body {
+    padding: 1.8rem;
+    flex: 1;
+    overflow-y: auto;
+    background: white;
+}
+/* filter labels & form controls (boostrapped but with some extra polish) */
+.filter-label {
+    font-size: 0.85rem;
+    /* text-transform: uppercase; */
+    letter-spacing: 0.02em;
+    color: #5f6d84;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+/* using bootstrap classes .form-control, .form-select already */
+.month-range-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.month-separator {
+    color: #8b99ae;
+    font-weight: 400;
+    font-size: 1.2rem;
+}
+/* custom buttons (extend bootstrap) */
+.btn-primary-custom {
+    background: #1e2f4d;
+    border: none;
+    border-radius: 40px;
+    padding: 0.7rem 1.8rem;
+    font-weight: 450;
+    color: white;
+    transition: 0.15s;
+    border: 1px solid #1b2a44;
+}
+.btn-primary-custom:hover {
+    background: #253b5c;
+}
+.btn-outline-custom {
+    background: transparent;
+    border: 1px solid #d7e0e9;
+    border-radius: 40px;
+    padding: 0.7rem 1.8rem;
+    color: #40536d;
+    font-weight: 450;
+}
+.btn-outline-custom:hover {
+    background: #f4f7fc;
+    border-color: #bcc9da;
+}
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 2rem;
+    border-top: 1px solid #ecf1f7;
+    padding-top: 1.8rem;
+}
+.active-filters {
+    font-size: 0.85rem;
+    color: #5c6f88;
+    background: #f7fafd;
+    border-radius: 30px;
+    padding: 0.5rem 1.2rem;
+    border: 1px dashed #ccd9e9;
+    display: inline-block;
+    /* margin-top: 1.2rem; */
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+.form-group label {
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  color: #444;
+}
+
+.form-group input{
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid #408dfb;
+  border-radius: 6px;
+  background-color: #fafafa;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.form-group select {
+  appearance: none;      
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #fafafa url("data:image/svg+xml;utf8,<svg fill='%23408dfb' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") no-repeat right 10px center;
+  background-size: 14px;
+  padding: 8px 34px 8px 10px;
+  font-size: 13px;
+  border: 1px solid #408dfb;   
+  border-radius: 6px;
+  color: #000000;              
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover + Focus styles */
+.form-group input:hover,
+.form-group select:hover {
+   border-color: #408dfb;
+   background-color: #fff;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #408dfb;
+  outline: none;
+  box-shadow: 0 0 5px rgba(64, 141, 251, 0.4);
+  background-color: #fff;
+}
+
+/* Option styling */
+.form-group select option {
+  padding: 6px;
+  font-size: 13px;
+}
+.lookup-list {
+  position: absolute;
+  /* top: 65%; */
+  left: 1.9rem;
+  right: 1.9rem;
+  background: white;
+  border: 1px solid #408dfb;
+  border-radius: 6px;
+  margin-top: 4px;
+  z-index: 99999;
+  display: none;
+  max-height: 150px; 
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.lookup-item {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.lookup-item:hover,
+.lookup-item.active {
+    background: #f0f0f0;
+}
+
+@media (max-width: 768px) {
+    .header-container h1 {
+        font-size: 1.8rem;
+    }
+    
+    .cashflow-table th, 
+    .cashflow-table td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .month-cell, .balance-cell {
+        min-width: 80px;
+    }
+}
