@@ -583,12 +583,29 @@ function renderMonthlySummary() {
 }
 
 // Toggle category expansion
+// function toggleCategory(categoryId, cashflowData) {
+//     const category = cashflowData.categories.find(c => c.id === categoryId);
+//     if (category) {
+//         category.expanded = !category.expanded;
+//         renderCashflowTable(cashflowData);
+//     }
+// }
+
 function toggleCategory(categoryId, cashflowData) {
     const category = cashflowData.categories.find(c => c.id === categoryId);
-    if (category) {
-        category.expanded = !category.expanded;
-        renderCashflowTable(cashflowData);
+    if (!category) return;
+
+    const willExpand = !category.expanded;
+    category.expanded = willExpand;
+
+    // ⭐ IMPORTANT FIX
+    if (willExpand) {
+        category.types.forEach(type => {
+            type.expanded = true; // reopen children
+        });
     }
+
+    renderCashflowTable(cashflowData);
 }
 
 // Toggle type expansion
