@@ -3,25 +3,71 @@ const monthsMap = {
     "May": 4, "June": 5, "July": 6, "August": 7,
     "September": 8, "October": 9, "November": 10, "December": 11,
   };
+const monthShortMap = {
+    Jan:0, Feb:1, Mar:2, Apr:3,
+    May:4, Jun:5, Jul:6, Aug:7,
+    Sep:8, Oct:9, Nov:10, Dec:11
+};
+
 // Months for the table headers
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-
+let globalDataStore = {
+    cf: [],
+    projection: []
+};
 async function RenderCashFlow(ReportName, recordCursor, AllFetchArr, orgId, type) {
-    let cash_resp = ""
-    let applyYear = "";
+  try {
     if(type === "default"){
-       const cf_response = await fetch(ReportName, recordCursor, AllFetchArr, orgId);
-        ArrayStorage(cf_response)
-        const currentYear = new Date().getFullYear();
-        applyYear = currentYear;
-        cash_resp = cf_response.filter(item => item.Year_field === currentYear.toString())
+        const cf_response = await fetch(ReportName, recordCursor, AllFetchArr, orgId);
+        globalDataStore.cf = cf_response.sort((a, b) =>a.Account_Name.localeCompare(b.Account_Name)) || [];
 
+        const projectionResp = await fetch("Projection_Cash_Flows_Raw_Js", recordCursor, [], orgId);
+        globalDataStore.projection = projectionResp.sort((a, b) =>a.Account_Name.localeCompare(b.Account_Name)) || [];
+    } 
+
+    renderByMode("cf");
+
+  } catch (err) {
+    console.error("Load error:", err);
+  }
+}
+
+function renderByMode(mode) {
+  const currentYear = new Date().getFullYear();
+
+    const source =
+        mode === "projection"
+        ? globalDataStore.projection
+        : globalDataStore.cf;
+
+    ArrayStorage(source)
+    const filtered = (source || []).filter(
+        item => String(item.Year_field) === String(currentYear)
+    );
+    processCashflowData(filtered, currentYear);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const toggle = document.getElementById("dataToggle");
+
+  toggle.addEventListener("change", function () {
+    if (this.checked) {
+      renderByMode("projection");
+    } else {
+      renderByMode("cf");
     }
-    else if(type ==="search"){
-       cash_resp  = AllFetchArr
-       applyYear = [...new Set (cash_resp.map(item=>item.Year_field))];
-    }
+    yearInput.value = "";
+    search_accountInput.value = "";
+    monthFrom.value = "";
+    monthTo.value = "";
+
+    filterPreview.innerHTML = "No active filters";
+  });
+
+});
+
+async function processCashflowData(arrData, applyYear) {
    
     // Header render
     const thead = document.querySelector('thead');
@@ -44,13 +90,6 @@ async function RenderCashFlow(ReportName, recordCursor, AllFetchArr, orgId, type
     thead.innerHTML = '';
     thead.appendChild(headerRow);
 
-
-    
-    const arrData = [...cash_resp].sort((a, b) =>
-        a.Account_Name.localeCompare(b.Account_Name)
-    );
-    // console.log("arrData = ",arrData)
-
     // pushing to Search
     LoadData(applyYear)
 
@@ -70,7 +109,6 @@ async function RenderCashFlow(ReportName, recordCursor, AllFetchArr, orgId, type
     let closingBalance = 0; 
 
     arrData.forEach(item => {
-        // if (item.Year_field !== year) return;
 
         const monthIndex = monthsMap[item.Month_field];
         const amount = parseFloat(item.Amount) || 0;
@@ -132,20 +170,19 @@ async function RenderCashFlow(ReportName, recordCursor, AllFetchArr, orgId, type
     });
   
     calculateMonthlyBalances(result, arrData);
-    renderCashflowTable(result);
-    // renderMonthlySummary();
+    renderCashflowTable(result, arrData);
 
     const collapseIcon = document.getElementById("collapseIcon");
     const expandIcon = document.getElementById("expandIcon");
 
     collapseIcon.addEventListener("click", () => {
-        collapseAll(result);
+        collapseAll(result, arrData);
         collapseIcon.style.display = "none";
         expandIcon.style.display = "inline";
     });
 
     expandIcon.addEventListener("click", () => {
-        expandAll(result);
+        expandAll(result, arrData);
         expandIcon.style.display = "none";
         collapseIcon.style.display = "inline";
     });
@@ -184,7 +221,6 @@ function calculateMonthlyBalances(cashflowData, arrData) {
         });
     });
     // Directly assign opening and closing from input array if available
-    // arrData.filter(e=> e.Year_field === year).forEach(item => {
     arrData.forEach(item => {
         const monthIndex = monthsMap[item.Month_field];
         const amount = parseFloat(item.Amount) || 0;
@@ -198,7 +234,7 @@ function calculateMonthlyBalances(cashflowData, arrData) {
 }
 
 // Render the cash flow table
-function renderCashflowTable(cashflowData) {
+function renderCashflowTable(cashflowData, arrData) {
     const tbody = document.getElementById('cashflowBody');
     tbody.innerHTML = '';
     
@@ -295,7 +331,7 @@ function renderCashflowTable(cashflowData) {
         // Add event listener to category row for expand/collapse
         categoryRow.querySelector('.expand-btn').addEventListener('click', function(e) {
             e.stopPropagation();
-            toggleCategory(category.id, cashflowData);
+            toggleCategory(category.id, cashflowData, arrData);
         });
         
         // Loop through each type in the category
@@ -360,11 +396,25 @@ function renderCashflowTable(cashflowData) {
                         //         ${type.name === 'Cash In' ? '+' : '-'}${formattedAmount}
                         //     </td>
                         // `;
+                    
+                        // Render projection due date
+                        const dueDates = arrData.filter(item => {
+                            if (!item.Due_Date) return false;
+
+                            const monthShort = item.Date_field.split("-")[1];
+                            const monthIndex = monthShortMap[monthShort];
+
+                            return item.Account_Name === account.name && monthIndex === index;
+                        });
+
+                        const dueText = dueDates.map(item =>
+                            `Transaction: ${item.Transactions || "-"} | Customer: ${item.Customer || "-"} | Due Date: ${item.Due_Date || "-"} | Custom Due Date: ${item.Custom_Due_Date || "-"} | Amount: ${item.Amount || "0.00"}`
+                        ).join("||");
                         accountHTML += `
-                            <td class="month-cell ${cellClass}">
-                               ${formattedAmount}
+                            <td class="month-cell ${cellClass}" ${dueText ? `data-due="${dueText}"` : ""}>
+                                ${formattedAmount}
                             </td>
-                        `;
+                            `;                        
                     });
                     
                     // Add total cell for account
@@ -537,6 +587,7 @@ function renderCashflowTable(cashflowData) {
     tbody.appendChild(closingRow);
 }
 
+
 // Render monthly summary table
 function renderMonthlySummary() {
     const tbody = document.getElementById('monthlySummary');
@@ -591,7 +642,7 @@ function renderMonthlySummary() {
 //     }
 // }
 
-function toggleCategory(categoryId, cashflowData) {
+function toggleCategory(categoryId, cashflowData, arrData) {
     const category = cashflowData.categories.find(c => c.id === categoryId);
     if (!category) return;
 
@@ -605,40 +656,144 @@ function toggleCategory(categoryId, cashflowData) {
         });
     }
 
-    renderCashflowTable(cashflowData);
+    renderCashflowTable(cashflowData, arrData);
 }
 
 // Toggle type expansion
-function toggleType(typeId, cashflowData) {
-    // Find the type within categories
-    for (const category of cashflowData.categories) {
-        const type = category.types.find(t => t.id === typeId);
-        if (type) {
-            type.expanded = !type.expanded;
-            renderCashflowTable(cashflowData);
-            break;
-        }
-    }
-}
+// function toggleType(typeId, cashflowData) {
+//     // Find the type within categories
+//     for (const category of cashflowData.categories) {
+//         const type = category.types.find(t => t.id === typeId);
+//         if (type) {
+//             type.expanded = !type.expanded;
+//             renderCashflowTable(cashflowData);
+//             break;
+//         }
+//     }
+// }
 
 // Expand all categories and types
-function expandAll(cashflowData) {
+function expandAll(cashflowData, arrData) {
     cashflowData.categories.forEach(category => {
         category.expanded = true;
         category.types.forEach(type => {
             type.expanded = true;
         });
     });
-    renderCashflowTable(cashflowData);
+    renderCashflowTable(cashflowData, arrData);
 }
 
 // Collapse all categories and types
-function collapseAll(cashflowData) {
+function collapseAll(cashflowData, arrData) {
     cashflowData.categories.forEach(category => {
         category.expanded = false;
         category.types.forEach(type => {
             type.expanded = false;
         });
     });
-    renderCashflowTable(cashflowData);
+    renderCashflowTable(cashflowData, arrData);
 }
+
+
+const tooltip = document.getElementById("dueTooltip");
+
+document.addEventListener("mouseover", function(e){
+
+    const cell = e.target.closest(".month-cell");
+    if(!cell) return;
+
+    const due = cell.dataset.due;
+    if(!due) return;
+
+    const cards = due.split("||").map(item=>{
+        const parts = item.split("|");
+
+        const transaction = parts[0].replace("Transaction:","").trim();
+        const customer = parts[1].replace("Customer:","").trim();
+        const dueDate = parts[2].replace("Due Date:","").trim();
+        const customDate = parts[3].replace("Custom Due Date:","").trim();
+        const amount = parts[4].replace("Amount:","").trim();
+
+        return `
+        <div class="due-card">
+
+            <div class="due-row">
+                <span class="due-label">Transaction#</span>
+                <span class="due-value">${transaction}</span>
+            </div>
+
+            <div class="due-row">
+                <span class="due-label">Customer</span>
+                <span class="due-value">${customer}</span>
+            </div>
+
+            <div class="due-row">
+                <span class="due-label">Due Date</span>
+                <span class="due-value">${dueDate}</span>
+            </div>
+
+            <div class="due-row">
+                <span class="due-label">Custom</span>
+                <span class="due-value custom">${customDate}</span>
+            </div>
+            <div class="due-row">
+                <span class="due-label">Amount</span>
+                <span class="due-value custom">${amount}</span>
+            </div>
+
+        </div>`;
+    }).join("");
+
+    tooltip.innerHTML = cards;
+    tooltip.style.display = "block";
+
+     const rect = cell.getBoundingClientRect();
+    const tooltipWidth = tooltip.offsetWidth;
+    const screenWidth = window.innerWidth;
+
+    let left;
+
+    // check right overflow
+    if(rect.right + tooltipWidth > screenWidth){
+        left = rect.left - tooltipWidth - 8;  // small gap
+    }else{
+        left = rect.right + 8;
+    }
+
+    tooltip.style.left = left + window.scrollX + "px";
+    tooltip.style.top = rect.top + window.scrollY + "px";
+
+});
+
+
+document.addEventListener("mouseout", function(e){
+
+    if(
+        !e.relatedTarget?.closest(".month-cell") &&
+        !e.relatedTarget?.closest("#dueTooltip")
+    ){
+        tooltip.style.display = "none";
+    }
+
+});
+
+// document.addEventListener("mousemove", function(e){
+
+//     if(tooltip.style.display !== "block") return;
+
+//      if(e.target.closest("#dueTooltip")) return;
+
+//     tooltip.style.left = (e.pageX + 15) + "px";
+//     tooltip.style.top = (e.pageY + 15) + "px";
+
+// });
+
+// document.addEventListener("mouseover", function(e){
+//     if(e.target.closest("#dueTooltip")) return;
+// })
+
+// document.addEventListener("mouseout", function(e){
+//     if(e.target.closest(".month-cell")){
+//         tooltip.style.display = "none";
+//     }
+// });

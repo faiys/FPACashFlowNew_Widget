@@ -29,26 +29,41 @@
         <!-- Cash Flow Table -->
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <!-- Left side -->
-                <div class="d-flex align-items-center gap-3">
-                    <span>
-                        <i class="fas fa-money-bill-wave me-2"></i>
-                        Cash Flow Details
-                    </span>
 
-                    <span class="text-muted fs-6">
+                <!-- LEFT -->
+                <div class="header-left d-flex align-items-center gap-3">
+
+                    <div class="title d-flex align-items-center">
+                        <!-- <i class="fas fa-money-bill-wave me-2"></i> -->
+                        <span>Cash Flow</span>
+                    </div>
+
+                    <div class="filter-preview text-muted small">
                         <i class="bi bi-funnel me-1"></i>
                         <span id="filterPreview" class="active-filters">
                             No active filters
                         </span>
-                    </span>
+                    </div>
+
                 </div>
 
-                <!-- Right side -->
-                <button class="search-icon-btn" id="openSearchBtn">
-                    <i class="bi bi-search"></i>
-                </button>
-            </div>
+                <!-- RIGHT -->
+                <div class="header-right d-flex align-items-center gap-3">
+
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" id="dataToggle">
+                        <label class="form-check-label small ms-1" for="dataToggle">
+                            Projection
+                        </label>
+                    </div>
+
+                    <button class="search-icon-btn" id="openSearchBtn">
+                        <i class="bi bi-search"></i>
+                    </button>
+
+                </div>
+
+                </div>
             <div class="card-body p-0">
                 <div class="table-container">
                     <table class="cashflow-table" id="cashflowTable">
@@ -59,6 +74,7 @@
                             <!-- Data will be populated by JavaScript -->
                         </tbody>
                     </table>
+                   <div id="dueTooltip" class="due-tooltip"></div>
                 </div>
             </div>
         </div>

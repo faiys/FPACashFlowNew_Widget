@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-
+//   const projectionResp = await fetch("Projection_Cash_Flows_Raw_Js", recordCursor, [], orgId);
 // Fetch Records
 async function fetch(ReportName, recordCursor, AllFetchArr, orgId){
     let Arr_merged =[];
@@ -25,6 +25,9 @@ async function fetch(ReportName, recordCursor, AllFetchArr, orgId){
            criteriaVar = `Status == "Active" && Email == "${loginEmail}"`;
         }
         else if(ReportName === "CashFlow_Report_Js" && orgId){
+           criteriaVar = `Organisation == ${orgId}`;
+        }
+        else if(ReportName === "Projection_Cash_Flows_Raw_Js" && orgId){
            criteriaVar = `Organisation == ${orgId}`;
         }
          var config = {

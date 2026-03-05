@@ -54,12 +54,9 @@ function LoadData(applyYear) {
         search_yearlist.style.display = "block";
     }
 
-    // yearInput.addEventListener("focus", () => renderYearList(""));
-    // yearInput.addEventListener("input", () => renderYearList(yearInput.value));
     yearInput.onfocus = () => renderYearList("");
     yearInput.oninput = () => renderYearList(yearInput.value);
 
-    // search_yearlist.addEventListener("click", e => {
     search_yearlist.onclick = e => {
         const item = e.target.closest(".lookup-item");
         if (!item) return;
@@ -93,14 +90,9 @@ function LoadData(applyYear) {
         search_accountlist.style.display = "block";
     }
 
-    // search_accountInput.addEventListener("focus", () => renderAccountList(""));
-    // search_accountInput.addEventListener("input", () =>
-    //     renderAccountList(search_accountInput.value)
-    // );
     search_accountInput.onfocus = () => renderAccountList("");
     search_accountInput.oninput = () => renderAccountList(search_accountInput.value);
 
-    // search_accountlist.addEventListener("click", e => {
     search_accountlist.onclick = e => {
         const item = e.target.closest(".lookup-item");
         if (!item) return;
@@ -111,7 +103,6 @@ function LoadData(applyYear) {
 
     /* ---------- APPLY FILTER ---------- */
 
-    // applyBtn.addEventListener("click", async() => {
     applyBtn.onclick = async () => {
         const year = yearInput.value;
         const account = search_accountInput.value;
@@ -159,19 +150,21 @@ function LoadData(applyYear) {
             filteredData = filteredDatas
         }
         if(preview.length > 0){
-            RenderCashFlow('', '',filteredData, '', 'search')
+            // RenderCashFlow('', '',filteredData, '', 'search')
+            const applyedYear = [...new Set (filteredData.map(item=>item.Year_field))];
+            processCashflowData(filteredData, applyedYear)
         }else{
             const userList = await getUserDetail("All_Users_Js", "", [])
             if(userList != null){
                 const orgId = userList[0];
+                const toggle = document.getElementById("dataToggle");
+                toggle.checked = false;
                 await RenderCashFlow("CashFlow_Report_Js", "",[], orgId, "default")
             }
         }
     };
 
     /* ---------- RESET FILTER ---------- */
-
-    // resetBtn.addEventListener("click", () => {
     resetBtn.onclick = () => {
         yearInput.value = "";
         search_accountInput.value = "";
@@ -193,45 +186,6 @@ document.addEventListener("mousedown", () => {
     search_accountlist.style.display = "none";
 });
 
-// update both previews
-// function updatePreviews() {
-//     const yearVal = yearInput.value.trim();
-//     const fromVal = monthFrom.value;
-//     const toVal = monthTo.value;
-    
-
-//     // preview inside modal
-//     let yearText = yearVal ? yearVal : '—';
-//     let monthText = '';
-//     if (fromVal && toVal) {
-//         monthText = `${monthName(fromVal)} – ${monthName(toVal)}`;
-//     } else if (fromVal) {
-//         monthText = `from ${monthName(fromVal)}`;
-//     } else if (toVal) {
-//         monthText = `up to ${monthName(toVal)}`;
-//     } else {
-//         monthText = 'all months';
-//     }
-
-//     // main card preview
-//     if (filterPreview) {
-//         if (!yearVal && !fromVal && !toVal) {
-//             filterPreview.innerHTML = `<i class="bi bi-funnel" style="margin-right: 6px;"></i> No active filters`;
-//         } else {
-//             let main = `<i class="bi bi-funnel-fill me-1"></i> `;
-//             if (yearVal) main += `Year: ${yearVal} `;
-//             if (fromVal || toVal) {
-//                 if (yearVal) main += `· `;
-//                 main += `Months: `;
-//                 if (fromVal && toVal) main += `${monthName(fromVal)} – ${monthName(toVal)}`;
-//                 else if (fromVal) main += `from ${monthName(fromVal)}`;
-//                 else if (toVal) main += `to ${monthName(toVal)}`;
-//             }
-//             filterPreview.innerHTML = main;
-//         }
-//     }
-// }
-
 // open modal
 function openModal() {
     modal.classList.add('show');
@@ -249,28 +203,6 @@ function closeModal() {
 openBtn.addEventListener('click', openModal);
 closeBtn.addEventListener('click', closeModal);
 overlay.addEventListener('click', closeModal);
- // apply: update preview and close
-// applyBtn.addEventListener('click', function(e) {
-//     e.preventDefault();
-//     updatePreviews();
-//     closeModal();
-// });
-
-// // reset: clear fields and update previews (modal stays open)
-// resetBtn.addEventListener('click', function(e) {
-//     e.preventDefault();
-//     yearInput.value = '';
-//     monthFrom.value = '';
-//     monthTo.value = '';
-//     updatePreviews();
-// });
- // live update while typing/changing inside modal
-// yearInput.addEventListener('input', updatePreviews);
-// monthFrom.addEventListener('change', updatePreviews);
-// monthTo.addEventListener('change', updatePreviews);
-
-// initial preview
-// updatePreviews();
 
 // escape key to close
 document.addEventListener('keydown', function(e) {
